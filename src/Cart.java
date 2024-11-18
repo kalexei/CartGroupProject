@@ -1,20 +1,29 @@
 public class Cart {
-	private static CartItem[] items = new CartItem[20];
+	private Item[] items = new Item[20];
 
-	public static CartItem addItem(Item newItem, int quantity) {
+	Cart() {}
+
+	public Item[] getCartItems() {
+		return items;
+	}
+
+	public Item addItem(Item newItem) {
 		for (int i = 0; i < items.length; i++) {
 			if(items[i] != null) continue;
-			items[i] = (CartItem) newItem;
-			items[i].quantity = quantity;
+			items[i] = newItem;
 			return items[i];
 		}
 		return null;
 	}
 
+	public void clearCart() {
+		items = new Item[20];
+	}
+
 	public int incrementQuantity(Item item) {
 		for (int i = 0; i < items.length; i++) {
-			if(items[i].equalsItem(item)) {
-				return items[i].incrementItemQuantity();
+			if(items[i].equals(item)) {
+				return items[i].incrementQuantity();
 			}
 		}
 		return 0;
@@ -22,8 +31,8 @@ public class Cart {
 
 	public int decrementQuantity(Item item) {
 		for (int i = 0; i < items.length; i++) {
-			if(items[i].equalsItem(item)) {
-				return items[i].decrementItemQuantity();
+			if(items[i].equals(item)) {
+				return items[i].decrementQuantity();
 			}
 		}
 		return 0;

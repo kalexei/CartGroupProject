@@ -1,18 +1,37 @@
 public class Item {
 	private String name;
-	private int price;
+	private double price;
+	private int quantity;
 
-	Item(String name, int price) {
+	Item(String name, double price) {
 		this.name = name;
 		this.price = price;
+		this.quantity = 1;
+	}
+
+	public String toString() {
+		return this.name + " at $" + this.price + " x" + this.quantity;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public int getPrice() {
+	public double getPrice() {
 		return price;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public int incrementQuantity() {
+		return quantity++;
+	}
+
+	public int decrementQuantity() {
+		if(quantity == 1) return 0;
+		return quantity--;
 	}
 
 	public double calculatePriceWithTax(double taxRate) {
@@ -21,10 +40,6 @@ public class Item {
 			return price;
 		}
 		return price * (1.00 + taxRate);
-	}
-
-	public boolean equalsItem(Item item) {
-		return item.getName().equals(this.name) && item.getPrice() == this.price;
 	}
 }
 
