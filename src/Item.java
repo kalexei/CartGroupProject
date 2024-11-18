@@ -22,4 +22,9 @@ public class Item {
 		}
 		return price * (1.00 + taxRate);
 	}
+
+	public boolean equalsItem(Item item) {
+		return item.getName().equals(this.name) && item.getPrice() == this.price;
+	}
 }
+
