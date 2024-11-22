@@ -20,21 +20,13 @@ public class Cart {
 		items = new Item[20];
 	}
 
-	public int incrementQuantity(Item item) {
-		for (int i = 0; i < items.length; i++) {
-			if(items[i].equals(item)) {
-				return items[i].incrementQuantity();
-			}
-		}
-		return 0;
-	}
+	public double calculateTotal() {
+		double total = 0;
 
-	public int decrementQuantity(Item item) {
-		for (int i = 0; i < items.length; i++) {
-			if(items[i].equals(item)) {
-				return items[i].decrementQuantity();
-			}
+		for (Item item: this.getCartItems()) {
+			total += item.getPrice();
 		}
-		return 0;
+
+		return total;
 	}
 }

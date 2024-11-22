@@ -6,8 +6,12 @@ public class ShoppingCartSystem {
 	private JFrame frame;
 	private JTextField itemNameField;
 	private JTextField itemPriceField;
+	private JTextField taxRateField;
 	private JTextArea cartArea;
+	private JLabel itemNameLabel;
+	private JLabel itemPriceLabel;
 	private JLabel totalLabel;
+	private JLabel taxRateLabel;
 	private JButton addButton;
 	private JButton calculateButton;
 	private JButton applyTaxButton;
@@ -22,6 +26,8 @@ public class ShoppingCartSystem {
 		cartArea.setText(cartOutput.toString());
 	}
 
+	double taxRate = 0.05;
+	boolean withTax = false;
 	public ShoppingCartSystem() {
 		Cart cart = new Cart();
 
@@ -34,7 +40,7 @@ public class ShoppingCartSystem {
 		// Step 2: Add components
 
 		// Label and field for item name
-		JLabel itemNameLabel = new JLabel("Item Name:");
+		itemNameLabel = new JLabel("Item Name:");
 		itemNameLabel.setBounds(20, 20, 100, 25);
 		frame.add(itemNameLabel);
 		itemNameField = new JTextField();
@@ -42,7 +48,7 @@ public class ShoppingCartSystem {
 		frame.add(itemNameField);
 
 		// Label and field for item price
-		JLabel itemPriceLabel = new JLabel("Item Price:");
+		itemPriceLabel = new JLabel("Item Price:");
 		itemPriceLabel.setBounds(20, 60, 100, 25);
 		frame.add(itemPriceLabel);
 		itemPriceField = new JTextField();
@@ -51,13 +57,21 @@ public class ShoppingCartSystem {
 
 		// Area for cart items
 		cartArea = new JTextArea();
-		cartArea.setBounds(20, 100, 440, 150);
+		cartArea.setBounds(20, 140, 440, 150);
 		cartArea.setEditable(false);
 		frame.add(cartArea);
 
+		// User-applied tax
+		taxRateLabel = new JLabel("Tax Rate (%): ");
+		taxRateLabel.setBounds(20, 100, 100, 25);
+		frame.add(taxRateLabel);
+		taxRateField = new JTextField();
+		taxRateField.setBounds(120, 100, 150, 25);
+		frame.add(taxRateField);
+
 		// Label for the cart total
 		totalLabel = new JLabel("Total: $0.00");
-		totalLabel.setBounds(20, 260, 150, 25);
+		totalLabel.setBounds(20, 300, 150, 25);
 		frame.add(totalLabel);
 
 		// Button to add an item to cart
@@ -66,8 +80,11 @@ public class ShoppingCartSystem {
 		addButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cart.addItem(new Item(itemNameField.getText(), Double.parseDouble(itemPriceField.getText())));
+				cart.addItem(new Item(itemNameField.getText(), Double.parseDouble(itemPriceField.getText()), withTax));
 				updateCartArea(cart);
+				itemNameField.setText("");
+				itemPriceField.setText("");
+				withTax = false;
 			}
 		});
 		frame.add(addButton);
@@ -77,7 +94,7 @@ public class ShoppingCartSystem {
 		calculateButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// calculateTotal(); goes here
+//				TaxCalculator.calculateTotalPriceWithTax(cart);
 			}
 		});
 		frame.add(calculateButton);
@@ -88,10 +105,14 @@ public class ShoppingCartSystem {
 		applyTaxButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//applyTax(); Method goes to this
+				if(withTax) return;
+				double currentPrice = Double.parseDouble(itemPriceField.getText());
+				currentPrice *= (1 + taxRate);
+				itemPriceField.setText(currentPrice + "");
+				withTax = true;
 			}
 		});
-		frame.add(applyTaxButton); // Make sure it's added to the frame
+		frame.add(applyTaxButton);
 
 		// Clear Cart Button
 		clearCartButton = new JButton("Clear Cart");
