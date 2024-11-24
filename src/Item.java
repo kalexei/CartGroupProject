@@ -21,13 +21,18 @@ public class Item {
 		return price;
 	}
 
+	public boolean hasBeenTaxed() {
+		return withTax;
+	}
 
 	public double calculatePriceWithTax(double taxRate) {
-		if(taxRate > 1.00 || taxRate < 0.00) {
-			System.out.println("Invalid tax rate");
-			return -1;
+		if(this.hasBeenTaxed()) {
+			return price;
 		}
-		return price * (1.00 + taxRate);
+		if(taxRate > 100 || taxRate < 0) {
+			throw new IllegalArgumentException("Tax rate must be between 100 and 0");
+		}
+		return price * (1.00 + taxRate / 100);
 	}
 }
 

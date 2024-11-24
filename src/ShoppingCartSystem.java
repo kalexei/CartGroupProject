@@ -2,21 +2,26 @@ import javax.swing.*;
 import java.awt.event.*;
 
 public class ShoppingCartSystem {
-	// GUI components
+	// Define GUI components
 	private JFrame frame;
 	private JTextField itemNameField;
 	private JTextField itemPriceField;
-	private JTextField taxRateField;
+	private JTextField taxRateForProductField;
+	private JTextField taxRateForCartField;
 	private JTextArea cartArea;
 	private JLabel itemNameLabel;
 	private JLabel itemPriceLabel;
 	private JLabel totalLabel;
-	private JLabel taxRateLabel;
+	private JLabel totalWithTaxLabel;
+	private JLabel taxRateForProductLabel;
+	private JLabel taxRateForCartLabel;
+	private JLabel errorLabel;
 	private JButton addButton;
-	private JButton calculateButton;
-	private JButton applyTaxButton;
-	private JButton clearCartButton; // New clear cart button
+	private JButton applyTaxForProductButton;
+	private JButton applyTaxForCartButton;
+	private JButton clearCartButton;
 
+	// Method to update the display of the list of added products
 	private void updateCartArea(Cart cart) {
 		StringBuilder cartOutput = new StringBuilder();
 		for (Item item: cart.getCartItems()) {
@@ -26,14 +31,25 @@ public class ShoppingCartSystem {
 		cartArea.setText(cartOutput.toString());
 	}
 
-	double taxRate = 0.05;
+	// Method to calculate the total price of the cart
+	private double updateTotalPrice(Cart cart) {
+		return cart.calculateTotal();
+	}
+
+	// Overload previous method to calculate the total price of the cart with tax
+	private double updateTotalPrice(Cart cart, double taxRate) {
+		return TaxCalculator.calculateTotalPriceWithTax(cart, taxRate);
+	}
+
+	double productTaxRate = 0;
+	double totalTaxRate = 0;
 	boolean withTax = false;
 	public ShoppingCartSystem() {
 		Cart cart = new Cart();
 
 		// Step 1: Create window
 		frame = new JFrame("Shopping Cart System");
-		frame.setSize(600, 400); // Increased the frame size
+		frame.setSize(680, 600); // Increased the frame size
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLayout(null);
 
@@ -41,90 +57,148 @@ public class ShoppingCartSystem {
 
 		// Label and field for item name
 		itemNameLabel = new JLabel("Item Name:");
-		itemNameLabel.setBounds(20, 20, 100, 25);
-		frame.add(itemNameLabel);
+		itemNameLabel.setBounds(20, 20, 170, 25);
+
 		itemNameField = new JTextField();
-		itemNameField.setBounds(120, 20, 150, 25);
-		frame.add(itemNameField);
+		itemNameField.setBounds(200, 20, 170, 25);
 
 		// Label and field for item price
 		itemPriceLabel = new JLabel("Item Price:");
-		itemPriceLabel.setBounds(20, 60, 100, 25);
-		frame.add(itemPriceLabel);
+		itemPriceLabel.setBounds(20, 60, 170, 25);
+
 		itemPriceField = new JTextField();
-		itemPriceField.setBounds(120, 60, 150, 25);
-		frame.add(itemPriceField);
+		itemPriceField.setBounds(200, 60, 170, 25);
+
+		// User-applied tax for the product
+		taxRateForProductLabel = new JLabel("Tax Rate for product (%): ");
+		taxRateForProductLabel.setBounds(20, 100, 170, 25);
+
+		taxRateForProductField = new JTextField();
+		taxRateForProductField.setBounds(200, 100, 170, 25);
 
 		// Area for cart items
 		cartArea = new JTextArea();
-		cartArea.setBounds(20, 140, 440, 150);
+		cartArea.setBounds(20, 140, 640, 200);
 		cartArea.setEditable(false);
-		frame.add(cartArea);
 
-		// User-applied tax
-		taxRateLabel = new JLabel("Tax Rate (%): ");
-		taxRateLabel.setBounds(20, 100, 100, 25);
-		frame.add(taxRateLabel);
-		taxRateField = new JTextField();
-		taxRateField.setBounds(120, 100, 150, 25);
-		frame.add(taxRateField);
+		// Apply tax for total button
+		applyTaxForCartButton = new JButton("Apply Tax for Cart");
+		applyTaxForCartButton.setBounds(450, 360, 170, 25);
+		applyTaxForCartButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				errorLabel.setVisible(false);
+				totalTaxRate = Double.parseDouble(taxRateForCartField.getText());
+				try {
+					double updatedTotalPriceWithTax = updateTotalPrice(cart, totalTaxRate);
+					totalWithTaxLabel.setText("Total with tax: $" + updatedTotalPriceWithTax);
+				} catch (Exception ex) {
+					errorLabel.setVisible(true);
+					errorLabel.setText(ex.getMessage());
+				}
+			}
+		});
+
+		// User-applied tax for the total of the cart
+		taxRateForCartLabel = new JLabel("Tax Rate for total (%): ");
+		taxRateForCartLabel.setBounds(20, 360, 170, 25);
+
+		taxRateForCartField = new JTextField();
+		taxRateForCartField.setBounds(200, 360, 170, 25);
 
 		// Label for the cart total
 		totalLabel = new JLabel("Total: $0.00");
-		totalLabel.setBounds(20, 300, 150, 25);
-		frame.add(totalLabel);
+		totalLabel.setBounds(20, 400, 400, 25);
+
+		// Label for the cart total with tax
+		totalWithTaxLabel = new JLabel("Total with tax: $0.00");
+		totalWithTaxLabel.setBounds(20, 440, 400, 25);
 
 		// Button to add an item to cart
 		addButton = new JButton("Add Item");
-		addButton.setBounds(300, 20, 150, 25);
+		addButton.setBounds(450, 20, 170, 25);
 		addButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cart.addItem(new Item(itemNameField.getText(), Double.parseDouble(itemPriceField.getText()), withTax));
-				updateCartArea(cart);
-				itemNameField.setText("");
-				itemPriceField.setText("");
-				withTax = false;
+				errorLabel.setVisible(false);
+				try {
+					cart.addItem(new Item(itemNameField.getText(), Double.parseDouble(itemPriceField.getText()), withTax));
+					updateCartArea(cart);
+					itemNameField.setText("");
+					itemPriceField.setText("");
+					double updatedTotalPrice = updateTotalPrice(cart);
+					double updatedTotalPriceWithTax = updateTotalPrice(cart, totalTaxRate);
+					totalLabel.setText("Total: $" + updatedTotalPrice);
+					totalWithTaxLabel.setText("Total with tax: $" + updatedTotalPriceWithTax);
+					withTax = false;
+				} catch (Exception ex) {
+					errorLabel.setVisible(true);
+					errorLabel.setText(ex.getMessage());
+				}
 			}
 		});
-		frame.add(addButton);
-
-		calculateButton = new JButton("Calculate Total");
-		calculateButton.setBounds(300, 60, 150, 25);
-		calculateButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-//				TaxCalculator.calculateTotalPriceWithTax(cart);
-			}
-		});
-		frame.add(calculateButton);
 
 		// Apply Tax Button
-		applyTaxButton = new JButton("Apply Tax (5%)");
-		applyTaxButton.setBounds(450, 20, 150, 25); // Adjusted position
-		applyTaxButton.addActionListener(new ActionListener() {
+		applyTaxForProductButton = new JButton("Apply Tax");
+		applyTaxForProductButton.setBounds(450, 100, 170, 25); // Adjusted position
+		applyTaxForProductButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(withTax) return;
-				double currentPrice = Double.parseDouble(itemPriceField.getText());
-				currentPrice *= (1 + taxRate);
-				itemPriceField.setText(currentPrice + "");
-				withTax = true;
+				errorLabel.setVisible(false);
+				try {
+					productTaxRate = Double.parseDouble(taxRateForProductField.getText());
+					double currentPrice = Double.parseDouble(itemPriceField.getText());
+					currentPrice *= (1 + productTaxRate / 100);
+					itemPriceField.setText(currentPrice + "");
+					withTax = true;
+				} catch (Exception ex) {
+					errorLabel.setVisible(true);
+					errorLabel.setText(ex.getMessage());
+				}
 			}
 		});
-		frame.add(applyTaxButton);
 
-		// Clear Cart Button
+		// Initialize the Clear Cart Button
 		clearCartButton = new JButton("Clear Cart");
-		clearCartButton.setBounds(450, 60, 150, 25); // Adjusted position
+		clearCartButton.setBounds(450, 390, 170, 25); // Adjusted position
 		clearCartButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cart.clearCart();
-				updateCartArea(cart);
+				errorLabel.setVisible(false);
+				try {
+					cart.clearCart();
+					updateCartArea(cart);
+					totalLabel.setText("Total: $0.00");
+					totalWithTaxLabel.setText("Total with tax: $0.00");
+				} catch (Exception ex) {
+					errorLabel.setVisible(false);
+					errorLabel.setText(ex.getMessage());
+				}
 			}
 		});
+
+		// Initialize the error text
+		errorLabel = new JLabel("");
+		errorLabel.setBounds(20, 450, 400, 50);
+
+		// Add all the UI items to the window frame
+		frame.add(itemNameLabel);
+		frame.add(itemNameField);
+		frame.add(itemPriceLabel);
+		frame.add(itemPriceField);
+		frame.add(taxRateForProductLabel);
+		frame.add(taxRateForProductField);
+		frame.add(addButton);
+		frame.add(applyTaxForProductButton);
+		frame.add(applyTaxForCartButton);
 		frame.add(clearCartButton);
+		frame.add(cartArea);
+		frame.add(totalLabel);
+		frame.add(totalWithTaxLabel);
+		frame.add(taxRateForCartLabel);
+		frame.add(taxRateForCartField);
+		frame.add(errorLabel);
 
 		frame.setVisible(true);
 	}
