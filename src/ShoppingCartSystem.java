@@ -20,6 +20,7 @@ public class ShoppingCartSystem {
 	private JButton applyTaxForProductButton;
 	private JButton applyTaxForCartButton;
 	private JButton clearCartButton;
+	private JScrollPane cartAreaScrollPane;
 
 	// Method to update the display of the list of added products
 	private void updateCartArea(Cart cart) {
@@ -80,6 +81,8 @@ public class ShoppingCartSystem {
 		cartArea = new JTextArea();
 		cartArea.setBounds(20, 140, 640, 200);
 		cartArea.setEditable(false);
+		cartAreaScrollPane = new JScrollPane(cartArea);
+		cartAreaScrollPane.setBounds(20, 140, 640, 200);
 
 		// Apply tax for total button
 		applyTaxForCartButton = new JButton("Apply Tax for Cart");
@@ -148,6 +151,8 @@ public class ShoppingCartSystem {
 				errorLabel.setVisible(false);
 				try {
 					productTaxRate = Double.parseDouble(taxRateForProductField.getText());
+					if(productTaxRate < 0 || productTaxRate > 100) throw new Exception("Tax rate must be between 0 and 100");
+
 					double currentPrice = Double.parseDouble(itemPriceField.getText());
 					currentPrice *= (1 + productTaxRate / 100);
 					itemPriceField.setText(currentPrice + "");
@@ -193,7 +198,7 @@ public class ShoppingCartSystem {
 		frame.add(applyTaxForProductButton);
 		frame.add(applyTaxForCartButton);
 		frame.add(clearCartButton);
-		frame.add(cartArea);
+		frame.add(cartAreaScrollPane);
 		frame.add(totalLabel);
 		frame.add(totalWithTaxLabel);
 		frame.add(taxRateForCartLabel);
