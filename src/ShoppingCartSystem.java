@@ -24,7 +24,7 @@ public class ShoppingCartSystem {
 	// Method to update the display of the list of added products
 	private void updateCartArea(Cart cart) {
 		StringBuilder cartOutput = new StringBuilder();
-		for (Item item: cart.getCartItems()) {
+		for (CartItem item: cart.getCartItems()) {
 			if(item == null) continue;
 			cartOutput.append(item).append("\n");
 		}
@@ -41,9 +41,9 @@ public class ShoppingCartSystem {
 		return TaxCalculator.calculateTotalPriceWithTax(cart, taxRate);
 	}
 
-	double productTaxRate = 0;
-	double totalTaxRate = 0;
-	boolean withTax = false;
+	private double productTaxRate = 0;
+	private double totalTaxRate = 0;
+	private boolean withTax = false;
 	public ShoppingCartSystem() {
 		Cart cart = new Cart();
 
@@ -122,7 +122,7 @@ public class ShoppingCartSystem {
 			public void actionPerformed(ActionEvent e) {
 				errorLabel.setVisible(false);
 				try {
-					cart.addItem(new Item(itemNameField.getText(), Double.parseDouble(itemPriceField.getText()), withTax));
+					cart.addItem(new CartItem(itemNameField.getText(), Double.parseDouble(itemPriceField.getText()), withTax));
 					updateCartArea(cart);
 					itemNameField.setText("");
 					itemPriceField.setText("");
@@ -180,7 +180,7 @@ public class ShoppingCartSystem {
 
 		// Initialize the error text
 		errorLabel = new JLabel("");
-		errorLabel.setBounds(20, 450, 400, 50);
+		errorLabel.setBounds(20, 450, 600, 50);
 
 		// Add all the UI items to the window frame
 		frame.add(itemNameLabel);

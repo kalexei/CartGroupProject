@@ -1,29 +1,29 @@
-public class Cart {
-	private Item[] items = new Item[20];
+abstract class CartTemplate {
+	private CartItem[] items = new CartItem[20];
 
-	Cart() {}
+	CartTemplate() {}
 
-	public Item[] getCartItems() {
+	public CartItem[] getCartItems() {
 		return items;
 	}
 
-	public Item addItem(Item newItem) {
+	public CartItem addItem(CartItem newItem) {
 		for (int i = 0; i < items.length; i++) {
 			if(items[i] != null) continue;
 			items[i] = newItem;
 			return items[i];
 		}
-		return null;
+		throw new ArrayIndexOutOfBoundsException("Cart is full");
 	}
 
 	public void clearCart() {
-		items = new Item[20];
+		items = new CartItem[20];
 	}
 
 	public double calculateTotal() {
 		double total = 0;
 
-		for (Item item: this.getCartItems()) {
+		for (CartItem item: this.getCartItems()) {
 			if(item == null) continue;
 			total += item.getPrice();
 		}
@@ -31,11 +31,10 @@ public class Cart {
 		return total;
 	}
 
-	// Overload
 	public double calculateTotal(double taxRate) {
 		double total = 0;
 
-		for (Item item: this.getCartItems()) {
+		for (CartItem item: this.getCartItems()) {
 			if(item == null) continue;
 			total += item.calculatePriceWithTax(taxRate);
 		}
@@ -43,3 +42,5 @@ public class Cart {
 		return total;
 	}
 }
+
+public class Cart extends CartTemplate {}
